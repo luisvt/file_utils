@@ -441,7 +441,7 @@ class FileUtils {
     String workingDirectory;
     if (!dirName.isEmpty) {
       name = basename(name);
-      if (pathos.isAbsolute(name)) {
+      if (pathos.isAbsolute(dirName)) {
         workingDirectory = dirName;
       } else {
         workingDirectory = "${Directory.current.path}\\$dirName";
