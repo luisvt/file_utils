@@ -394,9 +394,14 @@ class FileUtils {
       }
 
       if (Platform.isWindows) {
-        return _touchOnWindows(file, create);
+        if(!_touchOnWindows(file, create)) {
+          result = false;
+        }
+
       } else {
-        return _touchOnPosix(file, create);
+        if(!_touchOnPosix(file, create)) {
+          result = false;
+        }
       }
     }
 
