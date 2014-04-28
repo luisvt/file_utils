@@ -14,3 +14,4 @@ File utils is a collection of the helper methods for file system.
 - rmdir
 - symlink
 - testfile
+- touch
