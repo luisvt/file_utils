@@ -1,7 +1,7 @@
 name: file_utils
-version: 0.0.4
+version: 0.0.5
 author: Andrew Mezoni <andrew.mezoni@gmail.com>
-description: File utils is a collection of the helper methods for file system (basename, chdir, dirempty, dirname, getcwd, glob, mkdir, rm, rmdir, symlink, testfile, touch, uptodate).
+description: File utils is a collection of the helper methods for file system (basename, chdir, dirempty, dirname, getcwd, glob, mkdir, move, rename, rm, rmdir, symlink, testfile, touch, uptodate).
 homepage: https://github.com/mezoni/file_utils
 dependencies:
   globbing: any

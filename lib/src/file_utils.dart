@@ -167,6 +167,92 @@ class FileUtils {
   }
 
   /**
+   * Moves files [files] to the directory [dir]. Returns true if the operation
+   * was successful; otherwise false.
+   */
+  static bool move(List<String> files, String dir) {
+    if (files == null) {
+      return false;
+    }
+
+    if (dir == null) {
+      return false;
+    }
+
+    if (!testfile(dir, "directory")) {
+      return false;
+    }
+
+    var result = true;
+    for (var file in files) {
+      if (file.isEmpty) {
+        result = false;
+        continue;
+      }
+
+      var list = glob(file);
+      if (list.isEmpty) {
+        result = false;
+        continue;
+      }
+
+      for (var name in list) {
+        var basename = FileUtils.basename(name);
+        if(basename.isEmpty) {
+          result = false;
+          continue;
+        }
+
+        var dest = pathos.join(dir, basename);
+        if(!rename(name, dest)) {
+          result = false;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Renames or moves [src] to [dest]. Returns true if the operation was
+   * successful; otherwise false.
+   */
+  static bool rename(String src, String dest) {
+    if (src == null) {
+      return false;
+    }
+
+    if (dest == null) {
+      return false;
+    }
+
+    FileSystemEntity entity;
+    switch (FileStat.statSync(src).type) {
+      case FileSystemEntityType.DIRECTORY:
+        entity = new Directory(src);
+        break;
+      case FileSystemEntityType.FILE:
+        entity = new File(src);
+        break;
+      case FileSystemEntityType.LINK:
+        entity = new Link(src);
+        break;
+    }
+
+    if (entity == null) {
+      return false;
+    }
+
+    try {
+      entity.renameSync(dest);
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Removes the [files] and returns true if the operation was successful;
    * otherwise false.
    *
@@ -186,36 +272,60 @@ class FileUtils {
     }
 
     var result = true;
-    for (var name in files) {
-      name = name.toString();
-      if (name.isEmpty) {
-        result = false;
-        continue;
-      }
-
-      FileSystemEntity entity;
-      var isDirectory = false;
-      if (testfile(name, "link")) {
-        entity = new Link(name);
-      } else if (testfile(name, "file")) {
-        entity = new File(name);
-      } else if (testfile(name, "directory")) {
-        entity = new Directory(name);
-        isDirectory = true;
-      }
-
-      if (entity == null) {
+    for (var file in files) {
+      if (file.isEmpty) {
         if (!force) {
           result = false;
         }
-      } else {
-        if (isDirectory && (!directory && !recursive)) {
+
+        continue;
+      }
+
+      var list = glob(file);
+      if (list.isEmpty) {
+        if (!force) {
           result = false;
-        } else {
-          try {
-            entity.deleteSync(recursive: recursive);
-          } catch (e) {
+        }
+
+        continue;
+      }
+
+      for (var name in list) {
+        FileSystemEntity entity;
+        var isDirectory = false;
+        if (testfile(name, "link")) {
+          entity = new Link(name);
+        } else if (testfile(name, "file")) {
+          entity = new File(name);
+        } else if (testfile(name, "directory")) {
+          entity = new Directory(name);
+          isDirectory = true;
+        }
+
+        if (entity == null) {
+          if (!force) {
             result = false;
+          }
+        } else {
+          if (isDirectory) {
+            if (recursive) {
+              try {
+                entity.deleteSync(recursive: recursive);
+              } catch (e) {
+                result = false;
+              }
+            } else if (directory) {
+              result = rmdir([entity.path], parents: true);
+            } else {
+              result = false;
+            }
+
+          } else {
+            try {
+              entity.deleteSync();
+            } catch (e) {
+              result = false;
+            }
           }
         }
       }
@@ -261,36 +371,44 @@ class FileUtils {
         continue;
       }
 
-      if (testfile(name, "file")) {
-        result = false;
-        continue;
-      } else if (testfile(name, "link")) {
-        result = false;
-        continue;
-      } else if (!testfile(name, "directory")) {
+      var list = glob(name);
+      if (list.isEmpty) {
         result = false;
         continue;
       }
 
-      if (dirempty(name)) {
-        try {
-          new Directory(name).deleteSync();
-        } catch (e) {
+      for (var name in list) {
+        if (testfile(name, "file")) {
           result = false;
+          continue;
+        } else if (testfile(name, "link")) {
+          result = false;
+          continue;
+        } else if (!testfile(name, "directory")) {
+          result = false;
+          continue;
         }
-      } else {
-        if (parents) {
-          if (!canDelete(name)) {
+
+        if (dirempty(name)) {
+          try {
+            new Directory(name).deleteSync();
+          } catch (e) {
             result = false;
-          } else {
-            try {
-              new Directory(name).deleteSync(recursive: true);
-            } catch (e) {
-              result = false;
-            }
           }
         } else {
-          result = false;
+          if (parents) {
+            if (!canDelete(name)) {
+              result = false;
+            } else {
+              try {
+                new Directory(name).deleteSync(recursive: true);
+              } catch (e) {
+                result = false;
+              }
+            }
+          } else {
+            result = false;
+          }
         }
       }
     }
@@ -350,24 +468,24 @@ class FileUtils {
    * link:
    *   [file] exists and is a symbolic link.
    */
-    static bool testfile(String file, String test) {
-      if (file == null) {
-        return false;
-      }
-
-      switch (test) {
-        case "directory":
-          return new Directory(file).existsSync();
-        case "exists":
-          return FileStat.statSync(file) != FileSystemEntityType.NOT_FOUND;
-        case "file":
-          return new File(file).existsSync();
-        case "link":
-          return new Link(file).existsSync();
-        default:
-          return null;
-      }
+  static bool testfile(String file, String test) {
+    if (file == null) {
+      return false;
     }
+
+    switch (test) {
+      case "directory":
+        return new Directory(file).existsSync();
+      case "exists":
+        return FileStat.statSync(file) != FileSystemEntityType.NOT_FOUND;
+      case "file":
+        return new File(file).existsSync();
+      case "link":
+        return new Link(file).existsSync();
+      default:
+        return null;
+    }
+  }
 
 
   /**
@@ -394,12 +512,12 @@ class FileUtils {
       }
 
       if (Platform.isWindows) {
-        if(!_touchOnWindows(file, create)) {
+        if (!_touchOnWindows(file, create)) {
           result = false;
         }
 
       } else {
-        if(!_touchOnPosix(file, create)) {
+        if (!_touchOnPosix(file, create)) {
           result = false;
         }
       }
@@ -414,24 +532,24 @@ class FileUtils {
    * Non-existent files are older than any file.
    */
   static bool uptodate(String name, [List<String> other]) {
-    if(name == null || name.isEmpty) {
+    if (name == null || name.isEmpty) {
       return false;
     }
 
     var stat = FileStat.statSync(name);
-    if(stat.type == FileSystemEntityType.NOT_FOUND) {
+    if (stat.type == FileSystemEntityType.NOT_FOUND) {
       return false;
     }
 
-    if(other == null) {
+    if (other == null) {
       return true;
     }
 
     var date = stat.modified;
-    for(var name in other) {
+    for (var name in other) {
       var stat = FileStat.statSync(name);
-      if(stat.type != FileSystemEntityType.NOT_FOUND) {
-        if(date.compareTo(stat.modified) < 0) {
+      if (stat.type != FileSystemEntityType.NOT_FOUND) {
+        if (date.compareTo(stat.modified) < 0) {
           return false;
         }
       }

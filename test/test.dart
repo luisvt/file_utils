@@ -10,12 +10,18 @@ void main() {
   testDirname();
   testGetcwd();
   testGlob();
+  testMove();
   testRemove();
   testRemoveDir();
+  testRename();
   testSymlink();
   testTestfile();
   testTouch();
   testUptodate();
+}
+
+void clean() {
+  FileUtils.rm(["file*", "dir*"], recursive: true);
 }
 
 void testBasename() {
@@ -123,8 +129,10 @@ void testChdir() {
 void testDirEmpty() {
   var subject = "FileUtils.dirEmpty()";
 
+  // Clean
+  clean();
+
   // Empty directory
-  FileUtils.rm(["dir"], recursive: true);
   FileUtils.mkdir(["dir"]);
   var result = FileUtils.dirempty("dir");
   expect(result, true, reason: "$subject, empty directory");
@@ -138,6 +146,9 @@ void testDirEmpty() {
   FileUtils.rm(["dir"], recursive: true);
   result = FileUtils.dirempty("dir");
   expect(result, false, reason: "$subject, non-exists directory");
+
+  // Clean
+  clean();
 }
 
 void testDirname() {
@@ -245,17 +256,38 @@ void testGlob() {
   expect(result, expected, reason: subject);
 }
 
+void testMove() {
+  var subject = "FileUtils.move()";
+
+  // Clean
+  clean();
+
+  // Move files
+  FileUtils.mkdir(["dir1", "dir2"]);
+  FileUtils.touch(["dir1/file1.txt", "dir1/file2.txt"]);
+  var result = FileUtils.move(["dir1/*.txt"], "dir2");
+  expect(result, true, reason: "$subject, move files");
+  result = FileUtils.dirempty("dir1");
+  expect(result, true, reason: "$subject, move files");
+  result = FileUtils.dirempty("dir2");
+  expect(result, false, reason: "$subject, move files");
+
+  // Clean
+  clean();
+}
+
 void testRemove() {
   var subject = "FileUtils.rm()";
 
+  // Clean
+  clean();
+
   // Remove file
-  FileUtils.rm(["file"]);
   FileUtils.touch(["file"]);
   var result = FileUtils.rm(["file"]);
   expect(result, true, reason: "$subject, file");
 
   // Remove directory
-  FileUtils.rm(["dir"], recursive: true);
   FileUtils.mkdir(["dir"]);
   result = FileUtils.rm(["dir"]);
   expect(result, false, reason: "$subject, directory");
@@ -279,20 +311,26 @@ void testRemove() {
   expect(result, false, reason: "$subject, non exists file");
   result = FileUtils.rm(["non-exist"], recursive: true);
   expect(result, false, reason: "$subject, non exists file");
+  result = FileUtils.rm(["non-exist"], force: true);
+  expect(result, true, reason: "$subject, non exists file");
+
+  // Clean
+  clean();
 }
 
 void testRemoveDir() {
   var subject = "FileUtils.rmdir()";
 
+  // Clean
+  clean();
+
   // Remove file
-  FileUtils.rm(["file"]);
   FileUtils.touch(["file"]);
   var result = FileUtils.rmdir(["file"]);
   expect(result, false, reason: "$subject, file");
   FileUtils.rm(["file"]);
 
   // Remove empty directory
-  FileUtils.rm(["dir"], recursive: true);
   FileUtils.mkdir(["dir"]);
   result = FileUtils.rmdir(["dir"]);
   expect(result, true, reason: "$subject, empty directory");
@@ -313,6 +351,61 @@ void testRemoveDir() {
   // Remove non exists
   result = FileUtils.rmdir(["non-exists"]);
   expect(result, false, reason: "$subject, non exists");
+
+  // Clean
+  clean();
+}
+
+void testRename() {
+  var subject = "FileUtils.rename()";
+
+  // Clean
+  clean();
+
+  // Rename file
+  FileUtils.touch(["file1"] );
+  var result = FileUtils.rename("file1", "file2");
+  expect(result, true, reason: "$subject, rename file");
+  result = FileUtils.testfile("file1", "file");
+  expect(result, false, reason: "$subject, rename file");
+  result = FileUtils.testfile("file2", "file");
+  expect(result, true, reason: "$subject, rename file");
+
+  // Clean
+  clean();
+
+  // Move file
+  FileUtils.touch(["file1"] );
+  FileUtils.mkdir(["dir"] );
+  result = FileUtils.rename("file1", "dir/file");
+  expect(result, true, reason: "$subject, move file");
+  result = FileUtils.testfile("file", "file");
+  expect(result, false, reason: "$subject, rename file");
+  result = FileUtils.testfile("dir/file", "file");
+  expect(result, true, reason: "$subject, rename file");
+
+
+  // Clean
+  clean();
+
+  // Move directory
+  FileUtils.mkdir(["dir1"] );
+  FileUtils.mkdir(["dir2"] );
+  FileUtils.touch(["dir1/file1"] );
+  result = FileUtils.rename("dir1", "dir2/dir3");
+  expect(result, true, reason: "$subject, move director");
+  result = FileUtils.testfile("dir2/dir3", "directory");
+  expect(result, true, reason: "$subject, rename director");
+  result = FileUtils.testfile("dir2/dir3/file1", "file");
+  expect(result, true, reason: "$subject, rename director");
+  result = FileUtils.testfile("dir1", "directory");
+  expect(result, false, reason: "$subject, rename file");
+  FileUtils.rm(["dir2"], recursive: true);
+
+  // Clean
+  clean();
+
+  // TODO: test move link
 }
 
 void testSymlink() {
@@ -328,11 +421,12 @@ void testSymlink() {
 void testSymlinkOnPosix() {
   var subject = "FileUtils.symlink()";
 
+  // Clean
+  clean();
+
   // Create symlink to file
   var target = "file";
   var link = "file.link";
-  FileUtils.rm([target], recursive: true);
-  FileUtils.rm([link], recursive: true);
   FileUtils.touch([target]);
   var result = FileUtils.symlink(target, link);
   expect(result, true, reason: "$subject, create symlink to file");
@@ -344,14 +438,13 @@ void testSymlinkOnPosix() {
   // File exists
   result = FileUtils.testfile(link, "file");
   expect(result, true, reason: "$subject, file exists");
-  FileUtils.rm([target], recursive: true);
-  FileUtils.rm([link], recursive: true);
+
+  // Clean
+  clean();
 
   // Create symlink to directory
   target = "dir";
   link = "dir.link";
-  FileUtils.rm([target], recursive: true);
-  FileUtils.rm([link], recursive: true);
   FileUtils.mkdir([target]);
   result = FileUtils.symlink(target, link);
   expect(result, true, reason: "$subject, create symlink to directory");
@@ -363,18 +456,20 @@ void testSymlinkOnPosix() {
   // Directory exists
   result = FileUtils.testfile(link, "directory");
   expect(result, true, reason: "$subject, directory exists");
-  FileUtils.rm([target], recursive: true);
-  FileUtils.rm([link], recursive: true);
+
+  // Clean
+  clean();
 }
 
 void testSymlinkOnWindows() {
   var subject = "FileUtils.symlink()";
 
+  // Clean
+  clean();
+
   // Create symlink to directory
   var target = "dir";
   var link = "dir.link";
-  FileUtils.rm([target], recursive: true);
-  FileUtils.rm([link], recursive: true);
   FileUtils.mkdir([target]);
   var result = FileUtils.symlink(target, link);
   expect(result, true, reason: "$subject, create symlink to directory");
@@ -386,12 +481,16 @@ void testSymlinkOnWindows() {
   // Directory exists
   result = FileUtils.testfile(link, "directory");
   expect(result, true, reason: "$subject, directory exists");
-  FileUtils.rm([target], recursive: true);
-  FileUtils.rm([link], recursive: true);
+
+  // Clean
+  clean();
 }
 
 void testTestfile() {
   var subject = "FileUtils.test()";
+
+  // Clean
+  clean();
 
   // Test file
   var source = Platform.script.toFilePath();
@@ -412,23 +511,25 @@ void testTestfile() {
   // Test link
   source = "dir";
   var link = "dir.link";
-  FileUtils.rm([source], recursive: true);
   FileUtils.mkdir([source]);
   FileUtils.symlink(source, link);
   result = FileUtils.testfile(link, "link");
   expect(result, true, reason: "$subject, 'link'");
-  FileUtils.rm([source], recursive: true);
-  FileUtils.rm([link], recursive: true);
+
+  // Clean
+  clean();
 }
 
 void testTouch() {
   var subject = "FileUtils.touch()";
 
+  // Clean
+  clean();
+
   // Touch non exists bad file, create: true
   var dir = "dir";
   var file = "file";
   var path = "$dir/$file";
-  FileUtils.rm([dir], recursive: true);
   var result = FileUtils.touch([path]);
   expect(result, false, reason: "$subject, non exists bad file");
   result = FileUtils.testfile(path, file);
@@ -454,7 +555,9 @@ void testTouch() {
   expect(result, true, reason: "$subject, non exists good file");
   result = FileUtils.testfile(path, file);
   expect(result, false, reason: "$subject, non exists good file");
-  FileUtils.rm([dir], recursive: true);
+
+  // Clean
+  clean();
 
   // Touch in subdirectory
   dir = "test";
@@ -479,14 +582,17 @@ void testTouch() {
   result = stat2.modified.compareTo(stat1.modified) > 0;
   expect(result, true, reason: "$subject, in current directory");
 
-  FileUtils.rm([file]);
+  // Clean
+  clean();
 }
 
 void testUptodate() {
   var subject = "FileUtils.uptodate()";
 
+  // Clean
+  clean();
+
   // Non-existent file
-  FileUtils.rm(["file1"]);
   var result = FileUtils.uptodate("file1");
   expect(result, false, reason: "$subject, non-existent");
 
@@ -506,7 +612,8 @@ void testUptodate() {
   result = FileUtils.uptodate("file1", ["file2"]);
   expect(result, false, reason: "$subject, older and newer");
 
-  FileUtils.rm(["file1", "file2"]);
+  // Clean
+  clean();
 }
 
 void wait(int milliseconds) {
