@@ -408,6 +408,38 @@ class FileUtils {
     return result;
   }
 
+  /**
+   * Returns true if [name] is newer than all [other]; otherwise false.
+   *
+   * Non-existent files are older than any file.
+   */
+  static bool uptodate(String name, [List<String> other]) {
+    if(name == null || name.isEmpty) {
+      return false;
+    }
+
+    var stat = FileStat.statSync(name);
+    if(stat.type == FileSystemEntityType.NOT_FOUND) {
+      return false;
+    }
+
+    if(other == null) {
+      return true;
+    }
+
+    var date = stat.modified;
+    for(var name in other) {
+      var stat = FileStat.statSync(name);
+      if(stat.type != FileSystemEntityType.NOT_FOUND) {
+        if(date.compareTo(stat.modified) < 0) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
   static int _shell(String command, List<String> arguments, {String
       workingDirectory}) {
     return Process.runSync(command, arguments, runInShell: true,

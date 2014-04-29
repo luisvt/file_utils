@@ -15,6 +15,7 @@ void main() {
   testSymlink();
   testTestfile();
   testTouch();
+  testUptodate();
 }
 
 void testBasename() {
@@ -479,6 +480,33 @@ void testTouch() {
   expect(result, true, reason: "$subject, in current directory");
 
   FileUtils.rm([file]);
+}
+
+void testUptodate() {
+  var subject = "FileUtils.uptodate()";
+
+  // Non-existent file
+  FileUtils.rm(["file1"]);
+  var result = FileUtils.uptodate("file1");
+  expect(result, false, reason: "$subject, non-existent");
+
+  // Existent file
+  FileUtils.touch(["file1"]);
+  result = FileUtils.uptodate("file1");
+  expect(result, true, reason: "$subject, existent file");
+
+  // Existent and non-existent
+  wait(1000);
+  result = FileUtils.uptodate("file1", ["file2"]);
+  expect(result, true, reason: "$subject, existent and non-existent");
+
+  // Older and newer
+  wait(1000);
+  FileUtils.touch(["file2"]);
+  result = FileUtils.uptodate("file1", ["file2"]);
+  expect(result, false, reason: "$subject, older and newer");
+
+  FileUtils.rm(["file1", "file2"]);
 }
 
 void wait(int milliseconds) {

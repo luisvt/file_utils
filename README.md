@@ -15,3 +15,4 @@ File utils is a collection of the helper methods for file system.
 - symlink
 - testfile
 - touch
+- uptodate
