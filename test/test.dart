@@ -602,7 +602,6 @@ void testUptodate() {
   expect(result, true, reason: "$subject, existent file");
 
   // Existent and non-existent
-  wait(1000);
   result = FileUtils.uptodate("file1", ["file2"]);
   expect(result, true, reason: "$subject, existent and non-existent");
 

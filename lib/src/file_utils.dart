@@ -198,13 +198,13 @@ class FileUtils {
 
       for (var name in list) {
         var basename = FileUtils.basename(name);
-        if(basename.isEmpty) {
+        if (basename.isEmpty) {
           result = false;
           continue;
         }
 
         var dest = pathos.join(dir, basename);
-        if(!rename(name, dest)) {
+        if (!rename(name, dest)) {
           result = false;
         }
       }
@@ -547,10 +547,21 @@ class FileUtils {
 
     var date = stat.modified;
     for (var name in other) {
-      var stat = FileStat.statSync(name);
-      if (stat.type != FileSystemEntityType.NOT_FOUND) {
-        if (date.compareTo(stat.modified) < 0) {
-          return false;
+      if(name.isEmpty) {
+        continue;
+      }
+
+      var list = glob(name);
+      if (list.isEmpty) {
+        continue;
+      }
+
+      for (var name in list) {
+        var stat = FileStat.statSync(name);
+        if (stat.type != FileSystemEntityType.NOT_FOUND) {
+          if (date.compareTo(stat.modified) < 0) {
+            return false;
+          }
         }
       }
     }
