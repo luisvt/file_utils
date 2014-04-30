@@ -47,7 +47,7 @@ class FileUtils {
       return false;
     }
 
-    name = _tilde(name);
+    name = FilePath.expand(name);
     var directory = new Directory(name);
     if (!directory.existsSync()) {
       return false;
@@ -70,7 +70,7 @@ class FileUtils {
       return false;
     }
 
-    name = _tilde(name);
+    name = FilePath.expand(name);
     var directory = new Directory(name);
     if (!directory.existsSync()) {
       return false;
@@ -137,7 +137,7 @@ class FileUtils {
 
     Directory directory;
     if(isHome) {
-      var path = _tilde("~");
+      var path = FilePath.expand("~");
       directory = new Directory(path);
     } else if (pathos.isAbsolute(pattern)) {
       var path = pathos.rootPrefix(pattern);
@@ -165,7 +165,7 @@ class FileUtils {
     var result = true;
     for (var name in names) {
       name = name.toString();
-      name = _tilde(name);
+      name = FilePath.expand(name);
       var directory = new Directory(name);
       var exists = directory.existsSync();
       if (exists) {
@@ -244,8 +244,8 @@ class FileUtils {
       return false;
     }
 
-    src = _tilde(src);
-    dest = _tilde(dest);
+    src = FilePath.expand(src);
+    dest = FilePath.expand(dest);
     FileSystemEntity entity;
     switch (FileStat.statSync(src).type) {
       case FileSystemEntityType.DIRECTORY:
@@ -454,8 +454,8 @@ class FileUtils {
       return false;
     }
 
-    target = _tilde(target);
-    link = _tilde(link);
+    target = FilePath.expand(target);
+    link = FilePath.expand(link);
     if (_isWindows) {
       if (!testfile(target, "directory")) {
         return false;
@@ -495,7 +495,7 @@ class FileUtils {
       return false;
     }
 
-    file = _tilde(file);
+    file = FilePath.expand(file);
     switch (test) {
       case "directory":
         return new Directory(file).existsSync();
@@ -534,7 +534,7 @@ class FileUtils {
         continue;
       }
 
-      file = _tilde(file);
+      file = FilePath.expand(file);
       if (_isWindows) {
         if (!_touchOnWindows(file, create)) {
           result = false;
@@ -606,41 +606,6 @@ class FileUtils {
     }
 
     return _shell("touch", arguments) == 0;
-  }
-
-  static String _tilde(String path) {
-    if (path == null || path.isEmpty) {
-      return path;
-    }
-
-    if (path[0] != "~") {
-      return path;
-    }
-
-    String home;
-    if (_isWindows) {
-      home = Platform.environment["HOMEPATH"];
-    } else {
-      home = Platform.environment["HOME"];
-    }
-
-    if (home == null || home.isEmpty) {
-      return path;
-    }
-
-    if (home.endsWith("/") || home.endsWith("\\")) {
-      home = home.substring(0, home.length - 1);
-    }
-
-    if (path == "~" || path == "~/") {
-      return home;
-    }
-
-    if (path.startsWith("~/")) {
-      return home + "/" + path.substring(2);
-    }
-
-    return path;
   }
 
   static bool _touchOnWindows(String name, bool create) {
