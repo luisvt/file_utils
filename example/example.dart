@@ -1,25 +1,3 @@
-file_utils
-==========
-
-File utils is a collection of the helper methods for file system.
-
-- basename
-- chdir
-- dirempty
-- dirname
-- getcwd
-- glob
-- mkdir
-- move
-- rename
-- rm
-- rmdir
-- symlink
-- testfile
-- touch
-- uptodate
-
-```dart
 import "dart:io";
 import "package:file_utils/file_utils.dart";
 
@@ -188,4 +166,3 @@ void main() {
   FileUtils.rm(["temp1"], recursive: true);
   print("=============");
 }
-```
