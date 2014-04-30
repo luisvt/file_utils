@@ -1,6 +1,8 @@
 part of file_utils;
 
 class FileUtils {
+  static final bool _isWindows = Platform.isWindows;
+
   /**
    * Removes any leading directory components from [name].
    *
@@ -45,6 +47,7 @@ class FileUtils {
       return false;
     }
 
+    name = _tilde(name);
     var directory = new Directory(name);
     if (!directory.existsSync()) {
       return false;
@@ -67,6 +70,7 @@ class FileUtils {
       return false;
     }
 
+    name = _tilde(name);
     var directory = new Directory(name);
     if (!directory.existsSync()) {
       return false;
@@ -92,7 +96,7 @@ class FileUtils {
       return ".";
     }
 
-    if (Platform.isWindows) {
+    if (_isWindows) {
       name = name.replaceAll("\\", "/");
     }
 
@@ -120,9 +124,22 @@ class FileUtils {
    * Returns a list of files which match the specified glob [pattern].
    */
   static List<String> glob(String pattern, {bool caseSensitive}) {
-    var isAbsolute = pathos.isAbsolute(pattern);
+    if (pattern == null) {
+      return null;
+    }
+
+    var isHome = false;
+    if (pattern == "~") {
+      isHome = true;
+    } else if (pattern.startsWith("~/")) {
+      isHome = true;
+    }
+
     Directory directory;
-    if (isAbsolute) {
+    if(isHome) {
+      var path = _tilde("~");
+      directory = new Directory(path);
+    } else if (pathos.isAbsolute(pattern)) {
       var path = pathos.rootPrefix(pattern);
       directory = new Directory(path);
     } else {
@@ -148,6 +165,7 @@ class FileUtils {
     var result = true;
     for (var name in names) {
       name = name.toString();
+      name = _tilde(name);
       var directory = new Directory(name);
       var exists = directory.existsSync();
       if (exists) {
@@ -226,6 +244,8 @@ class FileUtils {
       return false;
     }
 
+    src = _tilde(src);
+    dest = _tilde(dest);
     FileSystemEntity entity;
     switch (FileStat.statSync(src).type) {
       case FileSystemEntityType.DIRECTORY:
@@ -434,7 +454,9 @@ class FileUtils {
       return false;
     }
 
-    if (Platform.isWindows) {
+    target = _tilde(target);
+    link = _tilde(link);
+    if (_isWindows) {
       if (!testfile(target, "directory")) {
         return false;
       }
@@ -473,6 +495,7 @@ class FileUtils {
       return false;
     }
 
+    file = _tilde(file);
     switch (test) {
       case "directory":
         return new Directory(file).existsSync();
@@ -511,7 +534,8 @@ class FileUtils {
         continue;
       }
 
-      if (Platform.isWindows) {
+      file = _tilde(file);
+      if (_isWindows) {
         if (!_touchOnWindows(file, create)) {
           result = false;
         }
@@ -547,7 +571,7 @@ class FileUtils {
 
     var date = stat.modified;
     for (var name in other) {
-      if(name.isEmpty) {
+      if (name.isEmpty) {
         continue;
       }
 
@@ -582,6 +606,41 @@ class FileUtils {
     }
 
     return _shell("touch", arguments) == 0;
+  }
+
+  static String _tilde(String path) {
+    if (path == null || path.isEmpty) {
+      return path;
+    }
+
+    if (path[0] != "~") {
+      return path;
+    }
+
+    String home;
+    if (_isWindows) {
+      home = Platform.environment["HOMEPATH"];
+    } else {
+      home = Platform.environment["HOME"];
+    }
+
+    if (home == null || home.isEmpty) {
+      return path;
+    }
+
+    if (home.endsWith("/") || home.endsWith("\\")) {
+      home = home.substring(0, home.length - 1);
+    }
+
+    if (path == "~" || path == "~/") {
+      return home;
+    }
+
+    if (path.startsWith("~/")) {
+      return home + "/" + path.substring(2);
+    }
+
+    return path;
   }
 
   static bool _touchOnWindows(String name, bool create) {

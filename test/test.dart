@@ -10,6 +10,7 @@ void main() {
   testDirname();
   testGetcwd();
   testGlob();
+  testMakeDir();
   testMove();
   testRemove();
   testRemoveDir();
@@ -124,6 +125,34 @@ void testChdir() {
   path = FileUtils.getcwd();
   result = FileUtils.basename(path);
   expect(result, expected, reason: "$subject, '$source'");
+
+  // Change directory to "~"
+  var restore = FileUtils.getcwd();
+  result = FileUtils.chdir("~");
+  expect(result, true, reason: "$subject, '~'");
+  FileUtils.chdir(restore);
+
+  // Change directory to "~/"
+  restore = FileUtils.getcwd();
+  result = FileUtils.chdir("~/");
+  expect(result, true, reason: "$subject, '~/'");
+  FileUtils.chdir(restore);
+
+  // Change to subdirectory of "~"
+  restore = FileUtils.getcwd();
+  FileUtils.chdir("~/");
+  var home = FileUtils.getcwd();
+  var mask = pathos.join(home, "*/");
+  var dirs = FileUtils.glob(mask);
+  for(var dir in dirs) {
+    var name = FileUtils.basename(dir);
+    var path = "~/$name";
+    result = FileUtils.chdir(path);
+    expect(result, true, reason: "$subject, '$path'");
+    FileUtils.chdir("..");
+  }
+
+  FileUtils.chdir(restore);
 }
 
 void testDirEmpty() {
@@ -254,6 +283,27 @@ void testGlob() {
 
   result.sort((a, b) => a.compareTo(b));
   expect(result, expected, reason: subject);
+
+  // ~/*/
+  // Home
+  mask = "~/*/";
+  files = FileUtils.glob(mask);
+  result = !files.isEmpty;
+  expect(result, true, reason: subject);
+}
+
+void testMakeDir() {
+  var subject = "FileUtils.mkdir()";
+
+  // Clean
+  clean();
+
+  // Make dir
+  var result = FileUtils.mkdir(["dir1"]);
+  expect(result, true, reason: "$subject, move files");
+
+  // Clean
+  clean();
 }
 
 void testMove() {
@@ -363,7 +413,7 @@ void testRename() {
   clean();
 
   // Rename file
-  FileUtils.touch(["file1"] );
+  FileUtils.touch(["file1"]);
   var result = FileUtils.rename("file1", "file2");
   expect(result, true, reason: "$subject, rename file");
   result = FileUtils.testfile("file1", "file");
@@ -375,8 +425,8 @@ void testRename() {
   clean();
 
   // Move file
-  FileUtils.touch(["file1"] );
-  FileUtils.mkdir(["dir"] );
+  FileUtils.touch(["file1"]);
+  FileUtils.mkdir(["dir"]);
   result = FileUtils.rename("file1", "dir/file");
   expect(result, true, reason: "$subject, move file");
   result = FileUtils.testfile("file", "file");
@@ -389,9 +439,9 @@ void testRename() {
   clean();
 
   // Move directory
-  FileUtils.mkdir(["dir1"] );
-  FileUtils.mkdir(["dir2"] );
-  FileUtils.touch(["dir1/file1"] );
+  FileUtils.mkdir(["dir1"]);
+  FileUtils.mkdir(["dir2"]);
+  FileUtils.touch(["dir1/file1"]);
   result = FileUtils.rename("dir1", "dir2/dir3");
   expect(result, true, reason: "$subject, move director");
   result = FileUtils.testfile("dir2/dir3", "directory");
