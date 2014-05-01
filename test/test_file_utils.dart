@@ -144,7 +144,7 @@ void testChdir() {
   var home = FileUtils.getcwd();
   var mask = pathos.join(home, "*/");
   var dirs = FileUtils.glob(mask);
-  for(var dir in dirs) {
+  for (var dir in dirs) {
     var name = FileUtils.basename(dir);
     var path = "~/$name";
     result = FileUtils.chdir(path);
@@ -261,7 +261,8 @@ void testGlob() {
   // *.dart
   // Relative
   var files = FileUtils.glob("*.dart");
-  var expected = ["test.dart"];
+  var expected = ["test_file_list.dart", "test_file_path.dart",
+      "test_file_utils.dart"];
   var result = [];
   for (var file in files) {
     result.add(pathos.basename(file));
@@ -275,7 +276,6 @@ void testGlob() {
   var path = FileUtils.dirname(Platform.script.toFilePath());
   var mask = path + "/*.dart";
   files = FileUtils.glob(mask);
-  expected = ["test.dart"];
   result = [];
   for (var file in files) {
     result.add(pathos.basename(file));

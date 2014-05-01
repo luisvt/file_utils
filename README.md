@@ -1,7 +1,23 @@
 file_utils
 ==========
 
-File utils is a collection of the helper methods for file system.
+File utils is a collection of the helper classes for file system.
+
+Includes the following helpers:
+
+- [FileList]
+- [FilePath]
+- [FileUtils]
+
+**FileList**
+
+Intelligent search of files with reduced amount of operations of disk access.
+
+**FileUtils**
+
+The collection of the helper methods for file system.
+
+Includes the following methods:
 
 - basename
 - chdir
@@ -18,6 +34,82 @@ File utils is a collection of the helper methods for file system.
 - testfile
 - touch
 - uptodate
+
+**FilePath**
+
+The collection of the helper methods for file path.
+
+Includes the following methods:
+
+- expand
+
+---
+
+Examples of `FileList`:
+
+```dart
+import "dart:io";
+import "package:file_utils/file_utils.dart";
+
+void main() {
+  // Find "unittest" packages in "pub cache"
+  var pubCache = getPubCachePath();
+  // Find "CHANGELOG" in "pub cache"
+  if (pubCache != null) {
+    var mask = "**/CHANGELOG*";
+    var directory = new Directory(pubCache);
+    var files = new FileList(directory, mask, caseSensitive: false);
+    if (!files.isEmpty) {
+      var list = files.toList();
+      var length = list.length;
+      print("Found $length 'CHANGELOG' files");
+      for (var file in files) {
+        print(file);
+      }
+    }
+  }
+}
+
+String getPubCachePath() {
+  var result = Platform.environment["PUB_CACHE"];
+  if (result != null) {
+    return result;
+  }
+
+  if (Platform.isWindows) {
+    result = FilePath.expand(r"$APPDATA/Pub/Cache");
+  } else {
+    result = FilePath.expand("~/.pub-cache");
+  }
+
+  return result;
+}
+```
+
+Examples of `FilePath`:
+
+```dart
+import "dart:io";
+import "package:file_utils/file_utils.dart";
+
+void main() {
+  // Directories in home directory, include hidden
+  var home = FilePath.expand("~");
+  var directory = new Directory(home);
+  var mask = "~/{.*,*}/";
+  var files = new FileList(directory, mask);
+  if (!files.isEmpty) {
+    var list = files.toList();
+    var length = list.length;
+    print("Found $length directories in $home");
+    for (var file in files) {
+      print(file);
+    }
+  }
+}
+```
+
+Examples of `FileUtils`:
 
 ```dart
 import "dart:io";
@@ -189,3 +281,7 @@ void main() {
   print("=============");
 }
 ```
+
+[FileList]: https://github.com/mezoni/file_utils/blob/master/lib/src/file_list.dart
+[FilePath]: https://github.com/mezoni/file_utils/blob/master/lib/src/file_path.dart
+[FileUtils]: https://github.com/mezoni/file_utils/blob/master/lib/src/file_utils.dart
