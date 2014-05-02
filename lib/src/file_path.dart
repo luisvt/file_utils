@@ -28,9 +28,6 @@ class FilePath {
         home = drive + path;
       } else {
         home = Platform.environment["USERPROFILE"];
-        if (home == null || home.isEmpty) {
-          home = Platform.environment["USERPROFILE"];
-        }
       }
 
     } else {
