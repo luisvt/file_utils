@@ -150,7 +150,22 @@ class FileUtils {
       var path = FilePath.expand("~");
       directory = new Directory(path);
     } else if (pathos.isAbsolute(pattern)) {
-      var path = pathos.rootPrefix(pattern);
+      // TODO: temporarily because slow to compile regex
+      // Create fast glob parser
+      var glob = new Glob(pattern);
+      var parts = [];
+      var segments = glob.segments;
+      var length = segments.length;
+      for (var i = 1; i < length; i++) {
+        var segment = glob.segments[i];
+        if (segment.strict) {
+          parts.add(segment);
+        } else {
+          break;
+        }
+      }
+
+      var path = segments.first.pattern + parts.join("/");
       directory = new Directory(path);
     } else {
       directory = Directory.current;

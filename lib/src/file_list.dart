@@ -142,8 +142,8 @@ class _DirectoryLister {
 
     var pathSegments = pathos.split(path);
     var length = pathSegments.length;
-    if (length > _segments.length) {
-      return;
+    if(length > _segments.length) {
+      length = _segments.length;
     }
 
     for (var i = 0; i < length; i++) {
@@ -174,10 +174,39 @@ class _DirectoryLister {
       return;
     }
 
-    for (var i = 0; i < length; i++) {
-      if (!_segments[i].match(pathSegments[i])) {
+    var index = 0;
+    for ( ; index < length; index++) {
+      var pathSegment = pathSegments[index];
+      var segment = _segments[index];
+      if (segment.onlyDirectory) {
+        pathSegment += "/";
+      }
+
+      if (!segment.match(pathSegment)) {
         return;
       }
+    }
+
+    if (index == _segments.length) {
+      var segment = _segments[index - 1];
+      var exists = false;
+      if (segment.onlyDirectory) {
+        exists = directory.existsSync();
+      } else {
+        exists = directory.existsSync();
+        if (!exists) {
+          exists = new File(path).existsSync();
+          if (!exists) {
+            exists = new Link(path).existsSync();
+          }
+        }
+      }
+
+      if(exists) {
+        _files.add(path);
+      }
+
+      return;
     }
 
     if (directory.existsSync()) {
