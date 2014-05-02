@@ -96,20 +96,25 @@ class FileUtils {
       return ".";
     }
 
-    if (_isWindows) {
-      name = name.replaceAll("\\", "/");
-    }
-
     var segments = pathos.split(name);
     if (segments.length == 1) {
       if (pathos.isAbsolute(name)) {
-        return pathos.rootPrefix(name);
+        var rootPrefix = pathos.rootPrefix(name);
+        if (_isWindows) {
+          rootPrefix = rootPrefix.replaceAll("\\", "/");
+        }
+
+        return rootPrefix;
       } else {
         return ".";
       }
     }
 
     var result = pathos.dirname(name);
+    if (_isWindows) {
+      result = result.replaceAll("\\", "/");
+    }
+
     return result;
   }
 
@@ -117,7 +122,12 @@ class FileUtils {
    * Returns the path of the current directory.
    */
   static String getcwd() {
-    return Directory.current.path;
+    var path = Directory.current.path;
+    if (_isWindows) {
+      path = path.replaceAll("\\", "/");
+    }
+
+    return path;
   }
 
   /**
@@ -136,7 +146,7 @@ class FileUtils {
     }
 
     Directory directory;
-    if(isHome) {
+    if (isHome) {
       var path = FilePath.expand("~");
       directory = new Directory(path);
     } else if (pathos.isAbsolute(pattern)) {
@@ -229,6 +239,52 @@ class FileUtils {
     }
 
     return result;
+  }
+
+  /**
+   * Returns the full name of the path if possible.
+   *
+   * On windows systems translates path in POSIX format replacing "\" to "/".
+   *
+   * Useful when you get path name from an unknown source, and intend to use it
+   * as part of the wildcard patterns.
+   *
+   * Do not use this method directly on wildcard patterns because it can deform
+   * the patterns.
+   */
+  static String pathname(String name) {
+    if (name.startsWith("..")) {
+      var path = Directory.current.parent.path;
+      if (name == "..") {
+        name = path;
+      } else if (name.startsWith("../")) {
+        name = pathos.join(path, name.substring(3));
+        name = pathos.normalize(name);
+      } else {
+        name = pathos.normalize(name);
+      }
+
+    } else if (name.startsWith(".")) {
+      var path = Directory.current.path;
+      if (name == ".") {
+        name = path;
+      } else if (name.startsWith("./")) {
+        name = pathos.join(path, name.substring(2));
+        name = pathos.normalize(name);
+      } else {
+        name = pathos.normalize(name);
+      }
+
+    } else {
+      name = pathos.normalize(name);
+    }
+
+    name = FilePath.expand(name);
+    if (_isWindows) {
+      name = name.replaceAll("\\", "/");
+    }
+
+    return name;
   }
 
   /**
@@ -560,6 +616,7 @@ class FileUtils {
       return false;
     }
 
+    name = FilePath.expand(name);
     var stat = FileStat.statSync(name);
     if (stat.type == FileSystemEntityType.NOT_FOUND) {
       return false;

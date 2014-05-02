@@ -27,6 +27,7 @@ Includes the following methods:
 - glob
 - mkdir
 - move
+- pathname
 - rename
 - rm
 - rmdir
@@ -207,6 +208,17 @@ void main() {
   print("files: $files");
 
   FileUtils.rm(["temp1", "temp2"], recursive: true);
+  print("=============");
+
+  // pathname
+  print("pathname:");
+  path = FileUtils.pathname("../packages");
+  print("name: ../packages");
+  print("path: $path");
+
+  path = FileUtils.pathname("~");
+  print("name: ~");
+  print("path: $path");
   print("=============");
 
   // rename

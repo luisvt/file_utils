@@ -95,6 +95,17 @@ void main() {
   FileUtils.rm(["temp1", "temp2"], recursive: true);
   print("=============");
 
+  // pathname
+  print("pathname:");
+  path = FileUtils.pathname("../packages");
+  print("name: ../packages");
+  print("path: $path");
+
+  path = FileUtils.pathname("~");
+  print("name: ~");
+  print("path: $path");
+  print("=============");
+
   // rename
   print("rename:");
   FileUtils.mkdir(["temp1"]);

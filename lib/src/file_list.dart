@@ -26,10 +26,6 @@ class FileList extends Object with ListMixin<String> {
       }
     }
 
-    if (_isWindows) {
-      pattern = pattern.replaceAll("\\", "/");
-    }
-
     pattern = FilePath.expand(pattern);
     _glob = new Glob(pattern, caseSensitive: caseSensitive);
     _files = _getFiles();

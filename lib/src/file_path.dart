@@ -30,6 +30,8 @@ class FilePath {
         home = Platform.environment["USERPROFILE"];
       }
 
+      home = home.replaceAll("\\", "/");
+
     } else {
       home = Platform.environment["HOME"];
     }
