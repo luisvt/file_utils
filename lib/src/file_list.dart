@@ -232,7 +232,14 @@ class _DirectoryLister {
       return;
     }
 
-    for (var entry in directory.listSync()) {
+    List<FileSystemEntity> list;
+    try {
+      list = directory.listSync();
+    } catch (e) {
+      list = new List<FileSystemEntity>();
+    }
+
+    for (var entry in list) {
       var entryPath = entry.path;
       if (_isWindows) {
         entryPath = entryPath.replaceAll("\\", "/");
@@ -270,7 +277,14 @@ class _DirectoryLister {
   }
 
   void _listRecursive(Directory directory) {
-    for (var entry in directory.listSync()) {
+    List<FileSystemEntity> list;
+    try {
+      list = directory.listSync();
+    } catch (e) {
+      list = new List<FileSystemEntity>();
+    }
+
+    for (var entry in list) {
       var entryPath = entry.path;
       if (_isWindows) {
         entryPath = entryPath.replaceAll("\\", "/");
@@ -351,7 +365,14 @@ class _DirectoryLister {
       return;
     }
 
-    for (var entry in directory.listSync()) {
+    List<FileSystemEntity> list;
+    try {
+      list = directory.listSync();
+    } catch (e) {
+      list = new List<FileSystemEntity>();
+    }
+
+    for (var entry in list) {
       var entryPath = entry.path;
       if (_isWindows) {
         entryPath = entryPath.replaceAll("\\", "/");
