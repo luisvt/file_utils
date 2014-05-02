@@ -1,6 +1,5 @@
 import "dart:io";
 import "package:file_utils/file_utils.dart";
-import "package:path/path.dart" as pathos;
 import "package:unittest/unittest.dart";
 
 void main() {
@@ -141,9 +140,9 @@ void testChdir() {
 
   // Change to subdirectory of "~"
   restore = FileUtils.getcwd();
-  FileUtils.chdir("~/");
+  FileUtils.chdir("~");
   var home = FileUtils.getcwd();
-  var mask = pathos.join(home, "*/");
+  var mask = home + "/" + "*/";
   var dirs = FileUtils.glob(mask);
   for (var dir in dirs) {
     var name = FileUtils.basename(dir);
@@ -266,7 +265,7 @@ void testGlob() {
       "test_file_utils.dart"];
   var result = [];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));
@@ -279,7 +278,7 @@ void testGlob() {
   files = FileUtils.glob(mask);
   result = [];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));

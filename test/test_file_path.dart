@@ -8,42 +8,46 @@ void main() {
 
 void testExpand() {
   String key;
+  String value;
   if(Platform.isWindows) {
-    key = "HOMEPATH";
+    key = r"$HOMEDRIVE$HOMEPATH";
+    value = Platform.environment["HOMEDRIVE"];
+    value += Platform.environment["HOMEPATH"];
   } else {
-    key = "HOME";
+    key = r"$HOME";
+    value = Platform.environment["HOME"];
   }
 
-  var value = Platform.environment[key];
+  value = FileUtils.pathname(value);
 
   // $key
-  var path = "\$${key}";
+  var path = "$key";
   var result = FilePath.expand(path);
   var expected = value;
   expect(result, expected, reason: path);
 
   // $key/1
-  path = "\$${key}/1";
+  path = "$key/1";
   result = FilePath.expand(path);
   expected = "$value/1";
   expect(result, expected, reason: path);
 
   // []$key]1
-  path = "[]\$${key}]1";
+  path = "[]$key]1";
   result = FilePath.expand(path);
-  expected = "[]\$$key]1";
+  expected = "[]$key]1";
   expect(result, expected, reason: path);
 
   // []$key]/1
-  path = "[]\$${key}]/1";
+  path = "[]$key]/1";
   result = FilePath.expand(path);
-  expected = "[]\$$key]/1";
+  expected = "[]$key]/1";
   expect(result, expected, reason: path);
 
   // [$key]$key/1
-  path = "[\$${key}]\$$key/1";
+  path = "[$key]$key/1";
   result = FilePath.expand(path);
-  expected = "[\$$key]$value/1";
+  expected = "[$key]$value/1";
   expect(result, expected, reason: path);
 
   // $1
@@ -71,7 +75,7 @@ void testExpand() {
   expect(result, expected, reason: path);
 
   // $HOMElower/1
-  path = "\$${key}lower/1";
+  path = "${key}lower/1";
   var home = FilePath.expand("~");
   result = FilePath.expand(path);
   expected = "${home}lower/1";

@@ -14,9 +14,10 @@ void main() {
 void testAbsolute() {
   var mask = "lib/src/*.dart";
   var path = Platform.script.toFilePath();
-  path = pathos.dirname(path);
-  path = pathos.dirname(path);
-  mask = pathos.join(path, mask);
+  path = FileUtils.pathname(path);
+  path = FileUtils.dirname(path);
+  path = FileUtils.dirname(path);
+  mask = path + "/" +  mask;
 
   // Path "/home/user/dart/globbing"
   // Mask "/home/user/dart/globbing/lib/src/*.dart"
@@ -31,7 +32,7 @@ void testAbsolute() {
   var expected = ["file_list.dart", "file_path.dart", "file_utils.dart"];
   var result = <String>[];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));
@@ -41,7 +42,7 @@ void testAbsolute() {
   files = new FileList(new Directory(path), mask);
   result = <String>[];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));
@@ -51,8 +52,10 @@ void testAbsolute() {
 void testCrossing() {
   var mask = "**/unittest.dart";
   var path = Platform.script.toFilePath();
-  path = pathos.dirname(path);
-  path = pathos.dirname(path);
+  path = FileUtils.pathname(path);
+  path = FileUtils.pathname(path);
+  path = FileUtils.dirname(path);
+  path = FileUtils.dirname(path);
 
   // Relative with crossing, starts with crossing
   // Path "/home/user/dart/globbing"
@@ -64,7 +67,7 @@ void testCrossing() {
   var expected = ["unittest.dart", "unittest.dart", "unittest.dart"];
   var result = <String>[];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));
@@ -79,7 +82,7 @@ void testCrossing() {
   expected = ["unittest.dart"];
   result = <String>[];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));
@@ -89,13 +92,13 @@ void testCrossing() {
   // Path "/home/user/dart/globbing"
   // Mask "/home/user/dart/globbing/test/**/unittest.dart"
   mask = "test/**/unittest.dart";
-  mask = pathos.join(path, mask);
+  mask = path + "/" +  mask;
   files = new FileList(new Directory(path), mask);
   // "globbing/test/packages/unittest/unittest.dart"
   expected = ["unittest.dart"];
   result = <String>[];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));
@@ -105,8 +108,9 @@ void testCrossing() {
 void testOnlyDirectory() {
   var mask = "*/";
   var path = Platform.script.toFilePath();
-  path = pathos.dirname(path);
-  path = pathos.dirname(path);
+  path = FileUtils.pathname(path);
+  path = FileUtils.dirname(path);
+  path = FileUtils.dirname(path);
 
   // Path "/home/user/dart/globbing"
   // Mask "*/"
@@ -115,7 +119,7 @@ void testOnlyDirectory() {
   var expected = ["example", "lib", "packages", "test"];
   var result = <String>[];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));
@@ -125,12 +129,12 @@ void testOnlyDirectory() {
   // Mask "**/"
   // Relative with crossing
   mask = "**/";
-  path = pathos.join(path, "lib");
+  path = path + "/" + "lib";
   files = new FileList(new Directory(path), mask);
   expected = ["src"];
   result = <String>[];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));
@@ -139,13 +143,13 @@ void testOnlyDirectory() {
   // Path "/home/user/dart/globbing"
   // Mask "/home/user/dart/globbing/*/"
   // Absolute
-  path = pathos.dirname(path);
+  path = FileUtils.dirname(path);
   mask = path + "/*/";
   files = new FileList(new Directory(path), mask);
   expected = ["example", "lib", "packages", "test"];
   result = <String>[];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));
@@ -154,13 +158,13 @@ void testOnlyDirectory() {
   // Path "/home/user/dart/globbing/lib"
   // Mask "/home/user/dart/globbing/lib/**/"
   // Absolute
-  path = pathos.join(path, "lib");
+  path = path + "/" + "lib";
   mask = path + "/**/";
   files = new FileList(new Directory(path), mask);
   expected = ["src"];
   result = <String>[];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));
@@ -170,8 +174,9 @@ void testOnlyDirectory() {
 void testRelative() {
   var mask = "lib/src/*.dart";
   var path = Platform.script.toFilePath();
-  path = pathos.dirname(path);
-  path = pathos.dirname(path);
+  path = FileUtils.pathname(path);
+  path = FileUtils.dirname(path);
+  path = FileUtils.dirname(path);
 
   // Path "/home/user/dart/globbing"
   // Mask "lib/src/*.dart"
@@ -179,7 +184,7 @@ void testRelative() {
   var expected = ["file_list.dart", "file_path.dart", "file_utils.dart"];
   var result = <String>[];
   for (var file in files) {
-    result.add(pathos.basename(file));
+    result.add(FileUtils.basename(file));
   }
 
   result.sort((a, b) => a.compareTo(b));

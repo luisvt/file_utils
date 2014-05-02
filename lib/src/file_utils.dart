@@ -244,10 +244,14 @@ class FileUtils {
   /**
    * Returns the full name of the path if possible.
    *
-   * On windows systems translates path in POSIX format replacing "\" to "/".
+   * Resolves the following values:
+   * - Leading '.' character indicating the current directory
+   * - Leading '..' character indicating the parent directory
+   * - Leading '~' character indicating the home directory
+   * - Environment variables in IEEE Std 1003.1-2001 format, eg. $HOME/dart-sdk
    *
-   * Useful when you get path name from an unknown source, and intend to use it
-   * as part of the wildcard patterns.
+   * Useful when you get path name in a format incompatible with POSIX, and
+   * intend to use it as part of the wildcard patterns.
    *
    * Do not use this method directly on wildcard patterns because it can deform
    * the patterns.

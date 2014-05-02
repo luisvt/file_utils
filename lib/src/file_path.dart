@@ -86,6 +86,8 @@ class FilePath {
               var value = Platform.environment[key];
               if (value == null) {
                 value = "";
+              } else if (_isWindows) {
+                value = value.replaceAll("\\", "/");
               }
 
               sb.write(value);
