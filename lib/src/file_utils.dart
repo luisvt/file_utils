@@ -188,18 +188,9 @@ class FileUtils {
       return null;
     }
 
-    var isHome = false;
-    if (pattern == "~") {
-      isHome = true;
-    } else if (pattern.startsWith("~/")) {
-      isHome = true;
-    }
-
+    pattern = FilePath.expand(pattern);
     Directory directory;
-    if (isHome) {
-      var path = FilePath.expand("~");
-      directory = new Directory(path);
-    } else if (pathos.isAbsolute(pattern)) {
+    if (pathos.isAbsolute(pattern)) {
       // TODO: temporarily because slow to compile regex
       // Create fast glob parser
       var glob = new Glob(pattern);
