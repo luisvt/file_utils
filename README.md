@@ -43,6 +43,7 @@ The collection of the helper methods for file path.
 Includes the following methods:
 
 - expand
+- fullname
 
 ---
 
