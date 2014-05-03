@@ -4,6 +4,7 @@ import "package:unittest/unittest.dart";
 
 void main() {
   testExpand();
+  testName();
 }
 
 void testExpand() {
@@ -18,7 +19,7 @@ void testExpand() {
     value = Platform.environment["HOME"];
   }
 
-  value = FileUtils.pathname(value);
+  value = FileUtils.fullpath(value);
 
   // $key
   var path = "$key";
@@ -80,4 +81,36 @@ void testExpand() {
   result = FilePath.expand(path);
   expected = "${home}lower/1";
   expect(result, expected, reason: path);
+}
+
+void testName() {
+  var subject = "FilePath.name()";
+
+  // .
+  var path = ".";
+  var result = FilePath.fullname(path);
+  var current = FileUtils.getcwd();
+  var expected = current;
+  expect(result, expected, reason: "$subject, $path");
+
+  // ..
+  path = "..";
+  result = FilePath.fullname(path);
+  current = FileUtils.getcwd();
+  expected = FileUtils.dirname(current);
+  expect(result, expected, reason: "$subject, $path");
+
+  // ./dir1
+  path = "./dir1";
+  result = FilePath.fullname(path);
+  current = FileUtils.getcwd();
+  expected = current + "/dir1";
+  expect(result, expected, reason: "$subject, $path");
+
+  // ./dir1/../../dir1
+  path = "./dir1/../../dir1";
+  result = FilePath.fullname(path);
+  current = FileUtils.getcwd();
+  expected = FileUtils.dirname(current) + "/dir1";
+  expect(result, expected, reason: "$subject, $path");
 }

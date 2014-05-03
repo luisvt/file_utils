@@ -14,7 +14,7 @@ void main() {
 void testAbsolute() {
   var mask = "lib/src/*.dart";
   var path = Platform.script.toFilePath();
-  path = FileUtils.pathname(path);
+  path = FileUtils.fullpath(path);
   path = FileUtils.dirname(path);
   path = FileUtils.dirname(path);
   mask = path + "/" +  mask;
@@ -52,8 +52,8 @@ void testAbsolute() {
 void testCrossing() {
   var mask = "**/unittest.dart";
   var path = Platform.script.toFilePath();
-  path = FileUtils.pathname(path);
-  path = FileUtils.pathname(path);
+  path = FileUtils.fullpath(path);
+  path = FileUtils.fullpath(path);
   path = FileUtils.dirname(path);
   path = FileUtils.dirname(path);
 
@@ -108,7 +108,7 @@ void testCrossing() {
 void testOnlyDirectory() {
   var mask = "*/";
   var path = Platform.script.toFilePath();
-  path = FileUtils.pathname(path);
+  path = FileUtils.fullpath(path);
   path = FileUtils.dirname(path);
   path = FileUtils.dirname(path);
 
@@ -174,7 +174,7 @@ void testOnlyDirectory() {
 void testRelative() {
   var mask = "lib/src/*.dart";
   var path = Platform.script.toFilePath();
-  path = FileUtils.pathname(path);
+  path = FileUtils.fullpath(path);
   path = FileUtils.dirname(path);
   path = FileUtils.dirname(path);
 

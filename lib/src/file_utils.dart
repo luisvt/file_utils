@@ -119,6 +119,56 @@ class FileUtils {
   }
 
   /**
+   * Returns the full name of the path if possible.
+   *
+   * Resolves the following segments:
+   * - Segments '.' indicating the current directory
+   * - Segments '..' indicating the parent directory
+   * - Leading '~' character indicating the home directory
+   * - Environment variables in IEEE Std 1003.1-2001 format, eg. $HOME/dart-sdk
+   *
+   * Useful when you get path name in a format incompatible with POSIX, and
+   * intend to use it as part of the wildcard patterns.
+   *
+   * Do not use this method directly on wildcard patterns because it can deform
+   * the patterns.
+   */
+  static String fullpath(String name) {
+    if (name.startsWith("..")) {
+      var path = Directory.current.parent.path;
+      if (name == "..") {
+        name = path;
+      } else if (name.startsWith("../")) {
+        name = pathos.join(path, name.substring(3));
+        name = pathos.normalize(name);
+      } else {
+        name = pathos.normalize(name);
+      }
+
+    } else if (name.startsWith(".")) {
+      var path = Directory.current.path;
+      if (name == ".") {
+        name = path;
+      } else if (name.startsWith("./")) {
+        name = pathos.join(path, name.substring(2));
+        name = pathos.normalize(name);
+      } else {
+        name = pathos.normalize(name);
+      }
+
+    } else {
+      name = pathos.normalize(name);
+    }
+
+    name = FilePath.expand(name);
+    if (_isWindows) {
+      name = name.replaceAll("\\", "/");
+    }
+
+    return name;
+  }
+
+  /**
    * Returns the path of the current directory.
    */
   static String getcwd() {
@@ -254,56 +304,6 @@ class FileUtils {
     }
 
     return result;
-  }
-
-  /**
-   * Returns the full name of the path if possible.
-   *
-   * Resolves the following values:
-   * - Leading '.' character indicating the current directory
-   * - Leading '..' character indicating the parent directory
-   * - Leading '~' character indicating the home directory
-   * - Environment variables in IEEE Std 1003.1-2001 format, eg. $HOME/dart-sdk
-   *
-   * Useful when you get path name in a format incompatible with POSIX, and
-   * intend to use it as part of the wildcard patterns.
-   *
-   * Do not use this method directly on wildcard patterns because it can deform
-   * the patterns.
-   */
-  static String pathname(String name) {
-    if (name.startsWith("..")) {
-      var path = Directory.current.parent.path;
-      if (name == "..") {
-        name = path;
-      } else if (name.startsWith("../")) {
-        name = pathos.join(path, name.substring(3));
-        name = pathos.normalize(name);
-      } else {
-        name = pathos.normalize(name);
-      }
-
-    } else if (name.startsWith(".")) {
-      var path = Directory.current.path;
-      if (name == ".") {
-        name = path;
-      } else if (name.startsWith("./")) {
-        name = pathos.join(path, name.substring(2));
-        name = pathos.normalize(name);
-      } else {
-        name = pathos.normalize(name);
-      }
-
-    } else {
-      name = pathos.normalize(name);
-    }
-
-    name = FilePath.expand(name);
-    if (_isWindows) {
-      name = name.replaceAll("\\", "/");
-    }
-
-    return name;
   }
 
   /**

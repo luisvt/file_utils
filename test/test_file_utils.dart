@@ -7,11 +7,11 @@ void main() {
   testChdir();
   testDirEmpty();
   testDirname();
+  testFullPath();
   testGetcwd();
   testGlob();
   testMakeDir();
   testMove();
-  testPathName();
   testRemove();
   testRemoveDir();
   testRename();
@@ -246,6 +246,70 @@ void testDirnameWindows() {
   }
 }
 
+void testFullPath() {
+  var subject = "FileUtils.fullpath()";
+
+  // Clean
+  clean();
+
+  // '.'
+  var result = FileUtils.fullpath(".");
+  var expected = FileUtils.getcwd();
+  expect(result, expected, reason: "$subject, '.'");
+
+  // './'
+  result = FileUtils.fullpath("./");
+  expected = FileUtils.getcwd();
+  expect(result, expected, reason: "$subject, './'");
+
+  // './test'
+  result = FileUtils.fullpath("./test");
+  expected = FileUtils.getcwd() + "/test";
+  expect(result, expected, reason: "$subject, './test'");
+
+  // '.test'
+  result = FileUtils.fullpath(".test");
+  expected = ".test";
+  expect(result, expected, reason: "$subject, '.test'");
+
+  // '..'
+  result = FileUtils.fullpath("..");
+  var save = FileUtils.getcwd();
+  FileUtils.chdir("..");
+  expected = FileUtils.getcwd();
+  FileUtils.chdir(save);
+  expect(result, expected, reason: "$subject, '..'");
+
+  // '../'
+  result = FileUtils.fullpath("../");
+  save = FileUtils.getcwd();
+  FileUtils.chdir("..");
+  expected = FileUtils.getcwd();
+  FileUtils.chdir(save);
+  expect(result, expected, reason: "$subject, '../'");
+
+  // '../test'
+  result = FileUtils.fullpath("../test");
+  save = FileUtils.getcwd();
+  FileUtils.chdir("..");
+  expected = FileUtils.getcwd() + "/test";
+  FileUtils.chdir(save);
+  expect(result, expected, reason: "$subject, '../test'");
+
+  // '..test'
+  result = FileUtils.fullpath("..test");
+  expected = "..test";
+  expect(result, expected, reason: "$subject, '..test'");
+
+  // '~'
+  result = FileUtils.fullpath("~");
+  expected = FilePath.expand("~");
+  expect(result, expected, reason: "$subject, '~'");
+
+  // Clean
+  clean();
+}
+
 void testGetcwd() {
   var subject = "FileUtils.getcwd()";
 
@@ -321,70 +385,6 @@ void testMove() {
   expect(result, true, reason: "$subject, move files");
   result = FileUtils.dirempty("dir2");
   expect(result, false, reason: "$subject, move files");
-
-  // Clean
-  clean();
-}
-
-void testPathName() {
-  var subject = "FileUtils.pathname()";
-
-  // Clean
-  clean();
-
-  // '.'
-  var result = FileUtils.pathname(".");
-  var expected = FileUtils.getcwd();
-  expect(result, expected, reason: "$subject, '.'");
-
-  // './'
-  result = FileUtils.pathname("./");
-  expected = FileUtils.getcwd();
-  expect(result, expected, reason: "$subject, './'");
-
-  // './test'
-  result = FileUtils.pathname("./test");
-  expected = FileUtils.getcwd() + "/test";
-  expect(result, expected, reason: "$subject, './test'");
-
-  // '.test'
-  result = FileUtils.pathname(".test");
-  expected = ".test";
-  expect(result, expected, reason: "$subject, '.test'");
-
-  // '..'
-  result = FileUtils.pathname("..");
-  var save = FileUtils.getcwd();
-  FileUtils.chdir("..");
-  expected = FileUtils.getcwd();
-  FileUtils.chdir(save);
-  expect(result, expected, reason: "$subject, '..'");
-
-  // '../'
-  result = FileUtils.pathname("../");
-  save = FileUtils.getcwd();
-  FileUtils.chdir("..");
-  expected = FileUtils.getcwd();
-  FileUtils.chdir(save);
-  expect(result, expected, reason: "$subject, '../'");
-
-  // '../test'
-  result = FileUtils.pathname("../test");
-  save = FileUtils.getcwd();
-  FileUtils.chdir("..");
-  expected = FileUtils.getcwd() + "/test";
-  FileUtils.chdir(save);
-  expect(result, expected, reason: "$subject, '../test'");
-
-  // '..test'
-  result = FileUtils.pathname("..test");
-  expected = "..test";
-  expect(result, expected, reason: "$subject, '..test'");
-
-  // '~'
-  result = FileUtils.pathname("~");
-  expected = FilePath.expand("~");
-  expect(result, expected, reason: "$subject, '~'");
 
   // Clean
   clean();

@@ -50,6 +50,12 @@ void main() {
   print("name: $name");
   print("=============");
 
+  // fullpath
+  print("fullpath:");
+  path = FileUtils.fullpath("../packages");
+  print("name: ../packages");
+  print("path: $path");
+
   // getcwd
   print("getcwd:");
   path = FileUtils.getcwd();
@@ -95,13 +101,7 @@ void main() {
   FileUtils.rm(["temp1", "temp2"], recursive: true);
   print("=============");
 
-  // pathname
-  print("pathname:");
-  path = FileUtils.pathname("../packages");
-  print("name: ../packages");
-  print("path: $path");
-
-  path = FileUtils.pathname("~");
+  path = FileUtils.fullpath("~");
   print("name: ~");
   print("path: $path");
   print("=============");

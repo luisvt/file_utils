@@ -20,6 +20,8 @@ class FilePath {
       return path;
     }
 
+
+    // TODO: add support of '~user' format.
     String home;
     if (_isWindows) {
       var drive = Platform.environment["HOMEDRIVE"];
@@ -50,6 +52,64 @@ class FilePath {
 
     if (path.startsWith("~/")) {
       return home + "/" + path.substring(2);
+    }
+
+    return path;
+  }
+
+  /**
+   * Returns the full name of the path if possible.
+   *
+   * Resolves the following segments:
+   * - Segments '.' indicating the current directory
+   * - Segments '..' indicating the parent directory
+   * - Leading '~' character indicating the home directory
+   * - Environment variables in IEEE Std 1003.1-2001 format, eg. $HOME/dart-sdk
+   *
+   * Useful when you get path name in a format incompatible with POSIX, and
+   * intend to use it as part of the wildcard patterns.
+   *
+   * Do not use this method directly on wildcard patterns because it can deform
+   * the patterns.
+   */
+  static String fullname(String path) {
+    if (path == null || path.isEmpty) {
+      return path;
+    }
+
+    var native = false;
+    var normalized = false;
+    if (path.startsWith("..")) {
+      native = true;
+      var current = Directory.current.parent.path;
+      if (path == "..") {
+        path = current;
+        normalized = true;
+      } else if (path.startsWith("../")) {
+        path = pathos.join(current, path.substring(3));
+      }
+
+    } else if (path.startsWith(".")) {
+      native = true;
+      var current = Directory.current.path;
+      if (path == ".") {
+        path = current;
+        normalized = true;
+      } else if (path.startsWith("./")) {
+        path = pathos.join(current, path.substring(2));
+      }
+    }
+
+    if(!native) {
+      path = FilePath.expand(path);
+    }
+
+    if(!normalized) {
+      path = pathos.normalize(path);
+    }
+
+    if (_isWindows) {
+      path = path.replaceAll("\\", "/");
     }
 
     return path;

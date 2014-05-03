@@ -23,11 +23,11 @@ Includes the following methods:
 - chdir
 - dirempty
 - dirname
+- fullpath
 - getcwd
 - glob
 - mkdir
 - move
-- pathname
 - rename
 - rm
 - rmdir
@@ -90,23 +90,15 @@ String getPubCachePath() {
 Examples of `FilePath`:
 
 ```dart
-import "dart:io";
-import "package:file_utils/file_utils.dart";
 
 void main() {
-  // Directories in home directory, include hidden
-  var home = FilePath.expand("~");
-  var directory = new Directory(home);
-  var mask = "~/{.*,*}/";
-  var files = new FileList(directory, mask);
-  if (!files.isEmpty) {
-    var list = files.toList();
-    var length = list.length;
-    print("Found $length directories in $home");
-    for (var file in files) {
-      print(file);
-    }
-  }
+  // Expand path
+  var path = FilePath.expand("~");
+  print(path);
+
+  // Full path name
+  path = FilePath.fullname("~/video/../music");
+  print(path);
 }
 ```
 
@@ -165,6 +157,12 @@ void main() {
   print("name: $name");
   print("=============");
 
+  // fullpath
+  print("fullpath:");
+  path = FileUtils.fullpath("../packages");
+  print("name: ../packages");
+  print("path: $path");
+
   // getcwd
   print("getcwd:");
   path = FileUtils.getcwd();
@@ -210,13 +208,7 @@ void main() {
   FileUtils.rm(["temp1", "temp2"], recursive: true);
   print("=============");
 
-  // pathname
-  print("pathname:");
-  path = FileUtils.pathname("../packages");
-  print("name: ../packages");
-  print("path: $path");
-
-  path = FileUtils.pathname("~");
+  path = FileUtils.fullpath("~");
   print("name: ~");
   print("path: $path");
   print("=============");
