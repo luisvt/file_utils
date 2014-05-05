@@ -88,6 +88,21 @@ void testCrossing() {
   result.sort((a, b) => a.compareTo(b));
   expect(result, expected, reason: mask);
 
+  // Relative with crossing, starts with non-crossing, only directory
+  // Path "/home/user/dart/globbing"
+  // Mask "lib/**/"
+  mask = "lib/**/";
+  files = new FileList(new Directory(path), mask);
+  // "globbing/lib/src"
+  expected = ["src"];
+  result = <String>[];
+  for (var file in files) {
+    result.add(FileUtils.basename(file));
+  }
+
+  result.sort((a, b) => a.compareTo(b));
+  expect(result, expected, reason: mask);
+
   // Absolute with crossing, starts with non-crossing
   // Path "/home/user/dart/globbing"
   // Mask "/home/user/dart/globbing/test/**/unittest.dart"
@@ -96,6 +111,22 @@ void testCrossing() {
   files = new FileList(new Directory(path), mask);
   // "globbing/test/packages/unittest/unittest.dart"
   expected = ["unittest.dart"];
+  result = <String>[];
+  for (var file in files) {
+    result.add(FileUtils.basename(file));
+  }
+
+  result.sort((a, b) => a.compareTo(b));
+  expect(result, expected, reason: mask);
+
+  // Absolute with crossing, starts with non-crossing, only directory
+  // Path "/home/user/dart/globbing"
+  // Mask "/home/user/dart/globbing/lib/**/"
+  mask = "lib/**/";
+  mask = path + "/" +  mask;
+  files = new FileList(new Directory(path), mask);
+  // "globbing/test/packages/unittest/unittest.dart"
+  expected = ["src"];
   result = <String>[];
   for (var file in files) {
     result.add(FileUtils.basename(file));
@@ -183,6 +214,44 @@ void testRelative() {
   var files = new FileList(new Directory(path), mask);
   var expected = ["file_list.dart", "file_path.dart", "file_utils.dart"];
   var result = <String>[];
+  for (var file in files) {
+    result.add(FileUtils.basename(file));
+  }
+
+  result.sort((a, b) => a.compareTo(b));
+  expect(result, expected, reason: mask);
+
+  // Asterisk, only dierctory
+  mask = "lib/*/";
+  path = Platform.script.toFilePath();
+  path = FileUtils.fullpath(path);
+  path = FileUtils.dirname(path);
+  path = FileUtils.dirname(path);
+
+  // Path "/home/user/dart/globbing"
+  // Mask "lib/*/"
+  files = new FileList(new Directory(path), mask);
+  expected = ["src"];
+  result = <String>[];
+  for (var file in files) {
+    result.add(FileUtils.basename(file));
+  }
+
+  result.sort((a, b) => a.compareTo(b));
+  expect(result, expected, reason: mask);
+
+  // Strict, only dierctory
+  mask = "lib/src/";
+  path = Platform.script.toFilePath();
+  path = FileUtils.fullpath(path);
+  path = FileUtils.dirname(path);
+  path = FileUtils.dirname(path);
+
+  // Path "/home/user/dart/globbing"
+  // Mask "lib/src/"
+  files = new FileList(new Directory(path), mask);
+  expected = ["src"];
+  result = <String>[];
   for (var file in files) {
     result.add(FileUtils.basename(file));
   }

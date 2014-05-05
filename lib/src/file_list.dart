@@ -350,12 +350,6 @@ class _DirectoryLister {
   void _listRelative(Directory directory, int level) {
     var segment = _segments[level];
     if (segment.strict && _useStrict) {
-      // TODO:
-      if(segment.onlyDirectory) {
-        //
-      }
-
-
       var path = pathos.join(directory.path, segment.pattern);
       directory = new Directory(path);
       var dirExists = directory.existsSync();

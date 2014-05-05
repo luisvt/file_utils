@@ -191,22 +191,21 @@ class FileUtils {
     pattern = FilePath.expand(pattern);
     Directory directory;
     if (pathos.isAbsolute(pattern)) {
-      // TODO: temporarily because slow to compile regex
-      // Create fast glob parser
-      var glob = new Glob(pattern);
+      var parser = new GlobParser();
+      var node = parser.parse(pattern);
       var parts = [];
-      var segments = glob.segments;
-      var length = segments.length;
+      var nodes = node.nodes;
+      var length = nodes.length;
       for (var i = 1; i < length; i++) {
-        var segment = glob.segments[i];
-        if (segment.strict) {
-          parts.add(segment);
+        var element = node.nodes[i];
+        if (element.strict) {
+          parts.add(element);
         } else {
           break;
         }
       }
 
-      var path = segments.first.pattern + parts.join("/");
+      var path = nodes.first.source + parts.join("/");
       directory = new Directory(path);
     } else {
       directory = Directory.current;
