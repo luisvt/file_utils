@@ -278,6 +278,12 @@ class _DirectoryLister {
         part = entryPath;
       }
 
+      if(segment.onlyDirectory) {
+        if(entry is Directory) {
+          part += "/";
+        }
+      }
+
       if (!segment.match(part)) {
         continue;
       }
@@ -344,6 +350,12 @@ class _DirectoryLister {
   void _listRelative(Directory directory, int level) {
     var segment = _segments[level];
     if (segment.strict && _useStrict) {
+      // TODO:
+      if(segment.onlyDirectory) {
+        //
+      }
+
+
       var path = pathos.join(directory.path, segment.pattern);
       directory = new Directory(path);
       var dirExists = directory.existsSync();
@@ -409,6 +421,13 @@ class _DirectoryLister {
         part = entryPath.substring(index + 1);
       } else {
         part = entryPath;
+      }
+
+      // TODO:
+      if (segment.onlyDirectory) {
+        if(entry is Directory) {
+          part += "/";
+        }
       }
 
       if (!segment.match(part)) {
