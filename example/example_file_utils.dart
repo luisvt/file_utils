@@ -99,12 +99,6 @@ void main() {
   print("files: $files");
 
   FileUtils.rm(["temp1", "temp2"], recursive: true);
-  print("=============");
-
-  path = FileUtils.fullpath("~");
-  print("name: ~");
-  print("path: $path");
-  print("=============");
 
   // rename
   print("rename:");

@@ -2,7 +2,6 @@ import "dart:io";
 import "package:file_utils/file_utils.dart";
 
 void main() {
-  // Find "unittest" packages in "pub cache"
   var pubCache = getPubCachePath();
   // Find "CHANGELOG" in "pub cache"
   if (pubCache != null) {
