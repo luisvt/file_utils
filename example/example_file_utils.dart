@@ -81,7 +81,7 @@ void main() {
   print("=============");
 
   // include
-  print("exclude:");
+  print("include:");
   files = FileUtils.glob("*.dart");
   files = FileUtils.include(files, "*_utils.dart");
   print("include: *_utils.dart");
