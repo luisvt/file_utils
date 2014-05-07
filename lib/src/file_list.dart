@@ -53,7 +53,15 @@ class FileList extends Object with ListMixin<String> {
   }
 
   bool _exists(String path) {
-    return FileStat.statSync(path).type != FileSystemEntityType.NOT_FOUND;
+    if (!new Directory(path).existsSync()) {
+      if (!new File(path).existsSync()) {
+        if (!new Link(path).existsSync()) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   List<String> _getFiles() {
@@ -63,7 +71,7 @@ class FileList extends Object with ListMixin<String> {
   }
 
   bool _isDirectory(String path) {
-    return FileStat.statSync(path).type == FileSystemEntityType.DIRECTORY;
+    return new Directory(path).existsSync();
   }
 
   List<String> _list(String path, bool followLinks) {
