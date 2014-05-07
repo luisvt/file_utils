@@ -50,6 +50,14 @@ void main() {
   print("name: $name");
   print("=============");
 
+  // exclude
+  print("exclude:");
+  var files = FileUtils.glob("*.dart");
+  files = FileUtils.exclude(files, "*_utils.dart");
+  print("exclude: *_utils.dart");
+  print("files: $files");
+  print("=============");
+
   // fullpath
   print("fullpath:");
   path = FileUtils.fullpath("../packages");
@@ -72,6 +80,14 @@ void main() {
   FileUtils.chdir(save);
   print("=============");
 
+  // include
+  print("exclude:");
+  files = FileUtils.glob("*.dart");
+  files = FileUtils.include(files, "*_utils.dart");
+  print("include: *_utils.dart");
+  print("files: $files");
+  print("=============");
+
   // mkdir
   print("mkdir:");
   FileUtils.mkdir(["temp"]);
@@ -88,7 +104,7 @@ void main() {
   FileUtils.touch(["temp1/file.txt"]);
   FileUtils.move(["temp1/*.txt"], "temp2");
 
-  var files = FileUtils.glob("temp1/*.txt");
+  files = FileUtils.glob("temp1/*.txt");
   files = files.map((e) => FileUtils.basename(e));
   print("path: temp1");
   print("files: $files");

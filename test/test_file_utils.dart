@@ -7,9 +7,11 @@ void main() {
   testChdir();
   testDirEmpty();
   testDirname();
+  testExclude();
   testFullPath();
   testGetcwd();
   testGlob();
+  testInclude();
   testMakeDir();
   testMove();
   testRemove();
@@ -246,6 +248,25 @@ void testDirnameWindows() {
   }
 }
 
+void testExclude() {
+  var subject = "FileUtils.exclude()";
+
+  // Clean
+  clean();
+
+  // *_utils.dart
+  var mask = "*_utils.dart";
+  var files = FileUtils.glob("*.dart");
+  var result = FileUtils.exclude(files, mask);
+  result = result.map((e) => FileUtils.basename(e)).toList();
+  result.sort((a, b) => a.compareTo(b));
+  var expected = ["test_file_list.dart", "test_file_path.dart"];
+  expect(result, expected, reason: "$subject, $mask");
+
+  // Clean
+  clean();
+}
+
 void testFullPath() {
   var subject = "FileUtils.fullpath()";
 
@@ -354,6 +375,25 @@ void testGlob() {
   files = FileUtils.glob(mask);
   result = !files.isEmpty;
   expect(result, true, reason: subject);
+}
+
+void testInclude() {
+  var subject = "FileUtils.include()";
+
+  // Clean
+  clean();
+
+  // *_utils.dart
+  var mask = "*_utils.dart";
+  var files = FileUtils.glob("*.dart");
+  var result = FileUtils.include(files, mask);
+  result = result.map((e) => FileUtils.basename(e)).toList();
+  result.sort((a, b) => a.compareTo(b));
+  var expected = ["test_file_utils.dart"];
+  expect(result, expected, reason: "$subject, $mask");
+
+  // Clean
+  clean();
 }
 
 void testMakeDir() {

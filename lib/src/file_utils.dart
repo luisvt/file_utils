@@ -119,6 +119,41 @@ class FileUtils {
   }
 
   /**
+   * Returns a list of files from which will be removed elements that match glob
+   * [pattern].
+   *
+   * Parameters:
+   *  [files]
+   *   List of file paths.
+   *  [pattern]
+   *   Pattern of glob filter.
+   */
+  static List<String> exclude(List<String> files, String pattern, {bool
+      caseSensitive}) {
+    if (files == null) {
+      return null;
+    }
+
+    if (pattern == null) {
+      return files.toList();
+    }
+
+    pattern = FilePath.expand(pattern);
+    if (!pathos.isAbsolute(pattern)) {
+      pattern = getcwd() + "/" + pattern;
+    }
+
+    var isDirectory = (String path) {
+      return new Directory(path).existsSync();
+    };
+
+    var filter = new GlobFilter(pattern, caseSensitive: caseSensitive,
+        isDirectory: isDirectory, isWindows: _isWindows);
+
+    return filter.exclude(files);
+  }
+
+  /**
    * Returns the full name of the path if possible.
    *
    * Resolves the following segments:
@@ -213,6 +248,42 @@ class FileUtils {
 
     return new FileList(directory, pattern, caseSensitive: caseSensitive);
   }
+
+  /**
+   * Returns a list of paths from which will be removed elements that do not
+   * match glob pattern.
+   *
+   * Parameters:
+   *  [files]
+   *   List of file path.
+   *  [pattern]
+   *   Pattern of glob filter.
+   */
+  static List<String> include(List<String> files, String pattern, {bool
+      caseSensitive}) {
+    if (files == null) {
+      return null;
+    }
+
+    if (pattern == null) {
+      return files.toList();
+    }
+
+    pattern = FilePath.expand(pattern);
+    if (!pathos.isAbsolute(pattern)) {
+      pattern = getcwd() + "/" + pattern;
+    }
+
+    var isDirectory = (String path) {
+      return new Directory(path).existsSync();
+    };
+
+    var filter = new GlobFilter(pattern, caseSensitive: caseSensitive,
+        isDirectory: isDirectory, isWindows: _isWindows);
+
+    return filter.include(files);
+  }
+
   /**
    * Creates listed directories and returns true if the operation was
    * successful; otherwise false.
