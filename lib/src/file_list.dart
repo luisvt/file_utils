@@ -5,11 +5,29 @@ class FileList extends Object with ListMixin<String> {
 
   final Directory directory;
 
+  bool _caseSensitive;
+
   List<String> _files;
+
+  Function _notify;
 
   String _pattern;
 
-  FileList(this.directory, String pattern, {bool caseSensitive}) {
+  /**
+   * Creates file list.
+   *
+   * Parameters:
+   *  [directory]
+   *   Directory whic will be listed.
+   *  [pattern]
+   *   Glob pattern of this file list.
+   *  [caseSensitive]
+   *   True, if the pattern is case sensitive; otherwise false.
+   *  [notify]
+   *   Function that is called whenever an item is added.
+   */
+  FileList(this.directory, String pattern, {bool caseSensitive, void
+      notify(String path)}) {
     if (directory == null) {
       throw new ArgumentError("directory: $directory");
     }
@@ -26,6 +44,8 @@ class FileList extends Object with ListMixin<String> {
       }
     }
 
+    _caseSensitive = caseSensitive;
+    _notify = notify;
     _pattern = FilePath.expand(pattern);
     _files = _getFiles();
   }
@@ -65,9 +85,9 @@ class FileList extends Object with ListMixin<String> {
   }
 
   List<String> _getFiles() {
-    var lister = new GlobLister(_pattern, exists: _exists, isDirectory:
-        _isDirectory, isWindows: _isWindows, list: _list);
-    return lister.list(directory.path);
+    var lister = new GlobLister(_pattern, caseSensitive: _caseSensitive, exists:
+        _exists, isDirectory: _isDirectory, isWindows: _isWindows, list: _list);
+    return lister.list(directory.path, notify: _notify);
   }
 
   bool _isDirectory(String path) {

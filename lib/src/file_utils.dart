@@ -127,9 +127,15 @@ class FileUtils {
    *   List of file paths.
    *  [pattern]
    *   Pattern of glob filter.
+   *  [added]
+   *   Function that is called whenever an item is added.
+   *  [caseSensitive]
+   *   True, if the pattern is case sensitive; otherwise false.
+   *  [removed]
+   *   Function that is called whenever an item is removed.
    */
-  static List<String> exclude(List<String> files, String pattern, {bool
-      caseSensitive}) {
+  static List<String> exclude(List<String> files, String pattern, {void
+      added(String path), bool caseSensitive, void removed(String path)}) {
     if (files == null) {
       return null;
     }
@@ -150,7 +156,7 @@ class FileUtils {
     var filter = new GlobFilter(pattern, caseSensitive: caseSensitive,
         isDirectory: isDirectory, isWindows: _isWindows);
 
-    return filter.exclude(files);
+    return filter.exclude(files, added: added, removed: removed);
   }
 
   /**
@@ -217,8 +223,17 @@ class FileUtils {
 
   /**
    * Returns a list of files which match the specified glob [pattern].
+   *
+   * Parameters:
+   *  [pattern]
+   *   Glob pattern of file list.
+   *  [caseSensitive]
+   *   True, if the pattern is case sensitive; otherwise false.
+   *  [notify]
+   *   Function that is called whenever an item is added.
    */
-  static List<String> glob(String pattern, {bool caseSensitive}) {
+  static List<String> glob(String pattern, {bool caseSensitive, void
+      notify(String path)}) {
     if (pattern == null) {
       return null;
     }
@@ -246,7 +261,8 @@ class FileUtils {
       directory = Directory.current;
     }
 
-    return new FileList(directory, pattern, caseSensitive: caseSensitive);
+    return new FileList(directory, pattern, caseSensitive: caseSensitive,
+        notify: notify);
   }
 
   /**
@@ -255,12 +271,18 @@ class FileUtils {
    *
    * Parameters:
    *  [files]
-   *   List of file path.
+   *   List of file paths.
    *  [pattern]
    *   Pattern of glob filter.
+   *  [added]
+   *   Function that is called whenever an item is added.
+   *  [caseSensitive]
+   *   True, if the pattern is case sensitive; otherwise false.
+   *  [removed]
+   *   Function that is called whenever an item is removed.
    */
-  static List<String> include(List<String> files, String pattern, {bool
-      caseSensitive}) {
+  static List<String> include(List<String> files, String pattern, {void
+      added(String path), bool caseSensitive, void removed(String path)}) {
     if (files == null) {
       return null;
     }
@@ -281,7 +303,7 @@ class FileUtils {
     var filter = new GlobFilter(pattern, caseSensitive: caseSensitive,
         isDirectory: isDirectory, isWindows: _isWindows);
 
-    return filter.include(files);
+    return filter.include(files, added: added, removed: removed);
   }
 
   /**
