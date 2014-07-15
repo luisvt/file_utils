@@ -658,7 +658,7 @@ class FileUtils {
       case "directory":
         return new Directory(file).existsSync();
       case "exists":
-        return FileStat.statSync(file) != FileSystemEntityType.NOT_FOUND;
+        return FileStat.statSync(file).type != FileSystemEntityType.NOT_FOUND;
       case "file":
         return new File(file).existsSync();
       case "link":
@@ -709,43 +709,32 @@ class FileUtils {
   }
 
   /**
-   * Returns true if [name] is newer than all [other]; otherwise false.
-   *
-   * Non-existent files are older than any file.
+   * Returns true if [file] is newer than all [depends]; otherwise false.
    */
-  static bool uptodate(String name, [List<String> other]) {
-    if (name == null || name.isEmpty) {
+  static bool uptodate(String file, [List<String> depends]) {
+    if (file == null || file.isEmpty) {
       return false;
     }
 
-    name = FilePath.expand(name);
-    var stat = FileStat.statSync(name);
+    file = FilePath.expand(file);
+    var stat = FileStat.statSync(file);
     if (stat.type == FileSystemEntityType.NOT_FOUND) {
       return false;
     }
 
-    if (other == null) {
+    if (depends == null) {
       return true;
     }
 
     var date = stat.modified;
-    for (var name in other) {
-      if (name.isEmpty) {
-        continue;
+    for (var name in depends) {
+      var stat = FileStat.statSync(name);
+      if (stat.type == FileSystemEntityType.NOT_FOUND) {
+        return false;
       }
 
-      var list = glob(name);
-      if (list.isEmpty) {
-        continue;
-      }
-
-      for (var name in list) {
-        var stat = FileStat.statSync(name);
-        if (stat.type != FileSystemEntityType.NOT_FOUND) {
-          if (date.compareTo(stat.modified) < 0) {
-            return false;
-          }
-        }
+      if (date.compareTo(stat.modified) < 0) {
+        return false;
       }
     }
 

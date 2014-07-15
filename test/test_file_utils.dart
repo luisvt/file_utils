@@ -641,7 +641,7 @@ void testSymlinkOnWindows() {
 }
 
 void testTestfile() {
-  var subject = "FileUtils.test()";
+  var subject = "FileUtils.testfile()";
 
   // Clean
   clean();
@@ -757,7 +757,7 @@ void testUptodate() {
 
   // Existent and non-existent
   result = FileUtils.uptodate("file1", ["file2"]);
-  expect(result, true, reason: "$subject, existent and non-existent");
+  expect(result, false, reason: "$subject, existent and non-existent");
 
   // Older and newer
   wait(1000);
